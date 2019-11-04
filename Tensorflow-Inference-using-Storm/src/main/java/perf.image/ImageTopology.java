@@ -18,6 +18,7 @@ import org.apache.storm.kafka.bolt.KafkaBolt;
 import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
 import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
 import org.apache.storm.spout.ByteArrayKeyValueScheme;
+import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.thrift.TException;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.utils.NimbusClient;
@@ -91,8 +92,8 @@ public class ImageTopology {
 
 		SpoutConfig kafkaSpoutConfig = new SpoutConfig(brokerHosts, inputTopic, "/" + inputTopic,
 				UUID.randomUUID().toString());
-//		kafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
-		kafkaSpoutConfig.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
+		kafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+//		kafkaSpoutConfig.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
 
 		/* KafkaBolt Configuration */
 		Properties props = new Properties();
@@ -128,8 +129,9 @@ public class ImageTopology {
 
 		builder.setSpout("kafka-spout", kafkaSpout, parameters.get(0));
 		builder.setBolt("tensor-bolt", tensorBolt, parameters.get(1)).shuffleGrouping("kafka-spout");
-		builder.setBolt("report-bolt", reportBolt, parameters.get(2)).shuffleGrouping("tensor-bolt");
-		builder.setBolt("kafka-bolt", kafkaBolt, parameters.get(3)).shuffleGrouping("report-bolt");            // Store Data to Kafka
+		builder.setBolt("kafka-bolt", kafkaBolt, parameters.get(2)).shuffleGrouping("tensor-bolt");
+//		builder.setBolt("report-bolt", reportBolt, parameters.get(2)).shuffleGrouping("tensor-bolt");
+//		builder.setBolt("kafka-bolt", kafkaBolt, parameters.get(3)).shuffleGrouping("report-bolt");            // Store Data to Kafka
 
 		Config config = new Config();
 		config.setNumWorkers(numWorkers);
