@@ -50,12 +50,14 @@ public class KafkaMain {
             return;
         }
 
-        Thread producer = new Thread(new ImageProducer(bootstrap, inputTopic, interval, path));
-        producer.start();
+        Thread producer = new Thread(new ImageJSONProducer(bootstrap, inputTopic, interval, path));
+        Thread consumer = new Thread(new PerfConsumer(zkhosts, outputTopic, "test-group", testTime));
 
+        producer.start();
+        consumer.start();
         try {
             for (int i=1; i<=10; i++) {
-                Thread.sleep(testTime*60*100/10);
+                Thread.sleep(testTime*1000*60/10);
                 System.out.println("TESING IN PROGRESS... " + (i*10) + "%");
             }
         } catch (InterruptedException e) {
