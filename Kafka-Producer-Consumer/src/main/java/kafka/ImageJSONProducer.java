@@ -20,6 +20,7 @@ public class ImageJSONProducer implements Runnable {
     private Random rand = new Random();
     private File tFile;
     private String filePath;
+    private String fileName;
     SimpleProducer<String, String> producerJSONstr;
 
 
@@ -43,7 +44,7 @@ public class ImageJSONProducer implements Runnable {
         for (int production=1; ; production++) {
 
             // read random image data
-            String fileName = String.valueOf(rand.nextInt(50));
+            fileName = String.valueOf(rand.nextInt(50));
             tFile = new File(filePath + fileName + ".jpg");
             byte[] readImage = readAllBytesOrExit(tFile.toPath());
 
