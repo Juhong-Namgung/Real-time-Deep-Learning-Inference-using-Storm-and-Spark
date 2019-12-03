@@ -17,7 +17,7 @@ import org.apache.storm.kafka.*;
 import org.apache.storm.kafka.bolt.KafkaBolt;
 import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
 import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
-import org.apache.storm.spout.ByteArrayKeyValueScheme;
+import org.apache.storm.spout.ObjectKeyValueScheme;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.thrift.TException;
 import org.apache.storm.topology.TopologyBuilder;

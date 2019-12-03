@@ -8,7 +8,7 @@ import org.apache.storm.tuple.Values;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class ByteArrayKeyValueScheme extends RawScheme implements KeyValueScheme {
+public class ObjectKeyValueScheme extends RawScheme implements KeyValueScheme {
     @Override
     public List<Object> deserializeKeyAndValue(ByteBuffer key, ByteBuffer value) {
         if (key == null) {
