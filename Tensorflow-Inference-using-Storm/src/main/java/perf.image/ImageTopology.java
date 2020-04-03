@@ -94,6 +94,9 @@ public class ImageTopology {
 		SpoutConfig kafkaSpoutConfig = new SpoutConfig(brokerHosts, inputTopic, "/" + inputTopic,
 				UUID.randomUUID().toString());
 		kafkaSpoutConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+		kafkaSpoutConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
+		kafkaSpoutConfig.ignoreZkOffsets = true;
+		kafkaSpoutConfig.maxOffsetBehind = 0;
 //		kafkaSpoutConfig.scheme = new KeyValueSchemeAsMultiScheme(new ByteArrayKeyValueScheme());
 
 		/* KafkaBolt Configuration */
