@@ -63,16 +63,15 @@ public class ImageJSONProducer implements Runnable {
                 Thread.sleep(this.interval);
             } catch (InterruptedException e) {}
         }
-
     }
 
     private static byte[] readAllBytesOrExit(Path path) {
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            System.err.println(e.toString());
-            System.err.println("Failed to read [" + path + "]: " + e.getMessage());
-            System.err.println("Here");
+            LOG.error((e.toString()));
+            LOG.error("Failed to read [" + path + "]: " + e.getMessage());
+            LOG.error("Here");
             System.exit(1);
         }
         return null;

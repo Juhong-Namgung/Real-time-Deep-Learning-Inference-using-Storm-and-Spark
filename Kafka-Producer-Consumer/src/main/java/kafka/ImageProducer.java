@@ -38,9 +38,6 @@ public class ImageProducer implements Runnable {
     private File tFile;
     private String filePath;
     SimpleProducer<String, byte[]> producer;
-//    private final Producer<String, byte[]> producer;
-//    Producer<String, String> producer;
-//    private KafkaProducer<String, String> kafkaProducer;
 
     public ImageProducer(String brokers, String topic, int interval, String filePath) {
         this.topic = topic;
@@ -53,11 +50,8 @@ public class ImageProducer implements Runnable {
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 //        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-
         ProducerConfig producerConfig = new ProducerConfig(properties);
         producer = new SimpleProducer<String, byte[]>(properties, false);
-//        producer = new Producer<String, String>(producerConfig);
-//        kafkaProducer = new KafkaProducer<String, String>(properties);
     }
 
     @Override
@@ -67,17 +61,14 @@ public class ImageProducer implements Runnable {
             JSONObject jSentence = new JSONObject();
 
             String fileName = String.valueOf(rand.nextInt(50));
-            System.out.println(filePath+ fileName + ".jpg");
+//            System.out.println(filePath+ fileName + ".jpg");
             tFile = new File(filePath + fileName + ".jpg");
 
             jSentence.put("image", readAllBytesOrExit(tFile.toPath()));
             jSentence.put("production", production);
             jSentence.put("createdTime", System.currentTimeMillis());
             String sentence = jSentence.toJSONString();
-            ProducerRecord<String, byte[]> record = new ProducerRecord<String, byte[]>(this.topic, fileName, readAllBytesOrExit(tFile.toPath()));
             producer.send(this.topic, readAllBytesOrExit(tFile.toPath()));
-//            producer.send((List<KeyedMessage<String, byte[]>>) record);
-//            producer.send(new KeyedMessage<String, String>(this.topic, sentence));
 
             try {
                 Thread.sleep(this.interval);
