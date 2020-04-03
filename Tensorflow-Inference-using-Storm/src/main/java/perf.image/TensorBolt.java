@@ -47,10 +47,10 @@ public class TensorBolt extends BaseRichBolt {
         this.collector = collector;
 
         // load label file
-        ClassPathResource labelResource = new ClassPathResource("imagenet_comp_graph_label_strings.txt");
+        ClassPathResource labelResource = new ClassPathResource("inception5h/imagenet_comp_graph_label_strings.txt");
         try {
-            File modelFile = new File("./label.txt");
-            IOUtils.copy(labelResource.getInputStream(), new FileOutputStream(modelFile));
+            File labelFile = new File("./label.txt");
+            IOUtils.copy(labelResource.getInputStream(), new FileOutputStream(labelFile));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,7 +74,7 @@ public class TensorBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        LOG.info(input.getValue(0));
+//        LOG.info(input.getValue(0));
 
         JSONParser parser = new JSONParser();
         JSONObject message = new JSONObject();
