@@ -1,5 +1,7 @@
 package perf.image;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.storm.task.OutputCollector;
@@ -22,6 +25,7 @@ import org.apache.storm.tuple.Values;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.core.io.ClassPathResource;
 import org.tensorflow.DataType;
 import org.tensorflow.Graph;
 import org.tensorflow.Output;
@@ -33,25 +37,38 @@ import org.tensorflow.types.UInt8;
 public class TensorBolt extends BaseRichBolt {
 
     OutputCollector collector;
-    //	static int ROW = 0;
-//	static int FEATURE = 0;
     byte[] graphDefs;
-    String modelPath = "/home/team1/juhong/kepco/tensorflowforjava/resultmodel/inception5h";
-    String modelName = "tensorflow_inception_graph.pb";
     List<String> labels;
     private byte[] imageBytes;
     private static Log LOG = LogFactory.getLog(TensorBolt.class);
 
-    public TensorBolt(String modelPath) {
-        this.modelPath = modelPath;
-    }
-
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-
         this.collector = collector;
-        this.graphDefs = readAllBytesOrExit(Paths.get(modelPath, modelName));
-        this.labels = readAllLinesOrExit(Paths.get(modelPath, "imagenet_comp_graph_label_strings.txt"));
+
+        // load label file
+        ClassPathResource labelResource = new ClassPathResource("imagenet_comp_graph_label_strings.txt");
+        try {
+            File modelFile = new File("./label.txt");
+            IOUtils.copy(labelResource.getInputStream(), new FileOutputStream(modelFile));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // load pre-trained model
+        ClassPathResource resource = new ClassPathResource("inception5h/tensorflow_inception_graph.pb");
+        try {
+            File modelFile = new File("./saved_model.pb");
+            IOUtils.copy(resource.getInputStream(), new FileOutputStream(modelFile));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        this.labels = readAllLinesOrExit(Paths.get("./", "label.txt"));
+        this.graphDefs = readAllBytesOrExit(Paths.get("./", "saved_model.pb"));
+
+        //b = SavedModelBundle.load("./", "serve");
+        //sess = b.session();
     }
 
     @Override
@@ -271,6 +288,4 @@ public class TensorBolt extends BaseRichBolt {
         }
         return total;
     }
-
-
 }
