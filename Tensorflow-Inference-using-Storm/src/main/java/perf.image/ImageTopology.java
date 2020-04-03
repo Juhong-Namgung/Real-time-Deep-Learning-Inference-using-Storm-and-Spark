@@ -53,13 +53,13 @@ public class ImageTopology {
 	private static String zkhosts = "MN:42181,SN01:42181,SN02:42181,SN03:42181,SN04:42181,SN05:42181,SN06:42181,SN07:42181,SN08:42181";
 
 	@Option(name = "--brokerList", aliases = {"--broker"}, metaVar = "BROKER LIST", usage = "path of broker list, bootstrap servers")
-	private static String bootstrap = "MN:9092,SN01:9092,SN02:9092,SN03:9092,SN04:9092,SN05:9092,SN06:9092,SN07:9092,SN08:9092";
+	private static String bootstrap = "MN:49092,SN01:49092,SN02:49092,SN03:49092,SN04:49092,SN05:49092,SN06:49092,SN07:49092,SN08:49092";
 
 	@Option(name = "--parallelismHint", aliases = {"--parm"}, metaVar = "PARALLELISM HINT", usage = "number of spout, bolts(KafkaSpout-ExtractBolt-ExpandBolt-ValidateBolt-DetectBolt-KafkaBolt")
-	private static String paralleism = "1 2 1 1";
+	private static String paralleism = "1 2 1";
 
-	@Option(name = "--modelPath", aliases = {"--model"} , metaVar = "TENSORFLOW MODEL PATH", usage ="path of deep learning model")
-	private static String modelPath = "./models/";
+//	@Option(name = "--modelPath", aliases = {"--model"} , metaVar = "TENSORFLOW MODEL PATH", usage ="path of deep learning model")
+//	private static String modelPath = "./models/";
 
 	public static void main(String[] args)
 			throws InterruptedException, NotAliveException, TException {
@@ -83,7 +83,8 @@ public class ImageTopology {
 		if (numWorkers <= 0) {
 			throw new IllegalArgumentException("Need at least one worker");
 		}
-		if (topologyName == null || topologyName.isEmpty()) {
+		if (topologyName == null ||
+				topologyName.isEmpty()) {
 			throw new IllegalArgumentException("Topology Name must be something");
 		}
 
@@ -105,19 +106,13 @@ public class ImageTopology {
 //		props.put("value.serializer", "org.springframework.kafka.support.serializer.JSONSerializer");
 
 		KafkaSpout kafkaSpout = new KafkaSpout(kafkaSpoutConfig);
-		TensorBolt tensorBolt = new TensorBolt(modelPath);
-		ReportBolt reportBolt = new ReportBolt();
+		TensorBolt tensorBolt = new TensorBolt();
+//		ReportBolt reportBolt = new ReportBolt();
 		KafkaBolt kafkaBolt = new KafkaBolt().withProducerProperties(props)
 				.withTopicSelector(new DefaultTopicSelector(outputTopic))
 				.withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper());
 
-			/* KafkaBolt */
-//
-//		MyKafkaBolt kafkabolt = new MyKafkaBolt().withProducerProperties(props)
-//				.withTopicSelector(new DefaultTopicSelector(outputTopic))
-//				.withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper());
-
-			/* Topology Build */
+		/* Topology Build */
 		TopologyBuilder builder = new TopologyBuilder();
 
 		ArrayList<Integer> parameters = new ArrayList<Integer>();
@@ -130,8 +125,6 @@ public class ImageTopology {
 		builder.setSpout("kafka-spout", kafkaSpout, parameters.get(0));
 		builder.setBolt("tensor-bolt", tensorBolt, parameters.get(1)).shuffleGrouping("kafka-spout");
 		builder.setBolt("kafka-bolt", kafkaBolt, parameters.get(2)).shuffleGrouping("tensor-bolt");
-//		builder.setBolt("report-bolt", reportBolt, parameters.get(2)).shuffleGrouping("tensor-bolt");
-//		builder.setBolt("kafka-bolt", kafkaBolt, parameters.get(3)).shuffleGrouping("report-bolt");            // Store Data to Kafka
 
 		Config config = new Config();
 		config.setNumWorkers(numWorkers);
@@ -152,5 +145,4 @@ public class ImageTopology {
 			LOG.info(ie.get_msg());
 		}
 	}
-
 }
