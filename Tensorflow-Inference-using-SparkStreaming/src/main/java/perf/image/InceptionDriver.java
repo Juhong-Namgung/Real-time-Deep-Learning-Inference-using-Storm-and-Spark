@@ -31,14 +31,9 @@ import java.util.*;
 
 public class InceptionDriver {
 
-
-    private String modelPath = "/home/team1/juhong/kepco/tensorflowforjava/resultmodel/inception5h";
     private String modelName = "tensorflow_inception_graph.pb";
     private byte[] graphDefs = readAllBytesOrExit(Paths.get(modelPath, modelName));
-    ;
     private List<String> labels = readAllLinesOrExit(Paths.get(modelPath, "imagenet_comp_graph_label_strings.txt"));
-    ;
-    private byte[] imageBytes;
 
     @Option(name = "--help", aliases = {"-h"}, usage = "print help message")
     private boolean _help = false;
@@ -64,15 +59,14 @@ public class InceptionDriver {
     @Option(name = "--brokerList", aliases = {"--broker"}, metaVar = "BROKER LIST", usage = "path of broker list, bootstrap servers")
     private static String bootstrap = "MN:9092,SN01:9092,SN02:9092,SN03:9092,SN04:9092,SN05:9092,SN06:9092,SN07:9092,SN08:9092";
 
-//    @Option(name = "--modelPath", aliases = {"--model"} , metaVar = "TENSORFLOW MODEL PATH", usage ="path of deep learning model")
-//    private static String modelPath = "./models/";
-
+    @Option(name = "--modelPath", aliases = {"--model"} , metaVar = "TENSORFLOW MODEL PATH", usage ="path of deep learning model")
+    private static String modelPath = "/home/team1/juhong/kepco/tensorflowforjava/resultmodel/inception5h";
 
     public static void main(String[] args) throws InterruptedException, UnsupportedEncodingException {
         new InceptionDriver().topoMain(args);
     }
 
-    public void topoMain(String[] args) throws InterruptedException {
+    private void topoMain(String[] args) throws InterruptedException {
         CmdLineParser parser = new CmdLineParser(this);
         parser.setUsageWidth(150);
 
@@ -131,8 +125,6 @@ public class InceptionDriver {
 //                );
 
         // Processing
-//        JavaDStream<String> lines = stream.map(ConsumerRecord::value);
-        //JavaDStream<String[]> inputs = stream.map(ConsumerRecord::value);
         JavaDStream<byte[]> inputs = kafkaStream.map(ConsumerRecord::value);
 
         // To solve Serializable Exception
@@ -152,6 +144,7 @@ public class InceptionDriver {
             }
 
         });
+
 //        JavaPairDStream<byte[], String> results = inputs.mapToPair(input-> {
 //            try (Tensor<Float> image = constructAndExecuteGraphToNormalizeImage(input)) {
 //
@@ -192,8 +185,6 @@ public class InceptionDriver {
 
         jssc.start();
         jssc.awaitTermination();
-
-
     }
 
     private static byte[] readAllBytesOrExit(Path path) {
@@ -218,6 +209,7 @@ public class InceptionDriver {
         return null;
     }
 
+    // Preprocess image to execute tensorflow graph
     private static Tensor<Float> constructAndExecuteGraphToNormalizeImage(byte[] imageBytes) {
         try (Graph g = new Graph()) {
             GraphBuilder b = new GraphBuilder(g);
@@ -251,6 +243,7 @@ public class InceptionDriver {
         }
     }
 
+    // Execute Inception tensorflow model
     private static float[] executeInceptionGraph(byte[] graphDef, Tensor<Float> image) {
         try (Graph g = new Graph()) {
             g.importGraphDef(graphDef);
